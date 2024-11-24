@@ -1,40 +1,42 @@
-﻿namespace Blazor.Monaco;
+﻿using Blazor.Monaco.EditorConfigurationOptions;
+
+namespace Blazor.Monaco;
 
 public static class MonacoDefaultScript
 {
-    public static readonly Dictionary<MonacoLanguage, string> Get = new()
+    public static readonly Dictionary<Language, string> Get = new()
     {
-        {MonacoLanguage.PlainText, @"Sample Text"},
-        {MonacoLanguage.CSharp, """
+        {Language.PlainText, @"Sample Text"},
+        {Language.CSharp, """
                                 // C# Sample
                                 Console.WriteLine("Hello World from C#");
                                 """},
-        {MonacoLanguage.JavaScript, """
+        {Language.JavaScript, """
                                     // JavaScript Sample
                                     console.log('Hello World from JavaScript');
                                     """},
-        {MonacoLanguage.TypeScript, """
+        {Language.TypeScript, """
                                     // TypeScript Sample
                                     console.log('Hello World from TypeScript');
                                     """},
-        {MonacoLanguage.HTML, """
+        {Language.Html, """
                               <!-- HTML Sample -->
                               <p>Hello World from HTML</p>
                               """},
-        {MonacoLanguage.CSS, """
+        {Language.Css, """
                              /* CSS Sample */
                              body { font-family: Arial, sans-serif; }
                              """},
-        {MonacoLanguage.JSON, """
+        {Language.Json, """
                               {
                                 "message": "Hello World from JSON"
                               }
                               """},
-        {MonacoLanguage.XML, """
+        {Language.Xml, """
                              <!-- XML Sample -->
                              <message>Hello World from XML</message>
                              """},
-        {MonacoLanguage.PowerShell, """
+        {Language.PowerShell, """
                                     # PowerShell Sample
                                     Write-Host "Hello World from PowerShell"
                                     """}
