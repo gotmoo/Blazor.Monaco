@@ -49,4 +49,13 @@ public partial class MonacoEditor : ComponentBase
         await ContentChanged.InvokeAsync(ContentHasChanged);
     }
 
+    public async Task SetEditorContent(string newContent)
+    {
+        await _service.SetEditorContent(ElementId, newContent);
+    }
+    public async Task<string> GetEditorContent()
+    {
+        return await _service.GetEditorContent(ElementId);
+    }
+
 }

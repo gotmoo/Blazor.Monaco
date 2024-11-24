@@ -132,4 +132,13 @@ $$$"""
             throw new InvalidOperationException("An error occurred while initializing the Monaco Editor.", ex);
         }
     }
+
+    public async Task SetEditorContent(string elementId, string newContent)
+    {
+        await _jsRuntime.InvokeVoidAsync("monacoInterop.setEditorContent", elementId, newContent);
+    }
+    public async Task<string> GetEditorContent(string elementId)
+    {
+        return await _jsRuntime.InvokeAsync<string>("monacoInterop.getEditorContent", elementId);
+    }
 }
