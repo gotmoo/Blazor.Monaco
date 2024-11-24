@@ -1,0 +1,17 @@
+﻿@namespace Blazor.Monaco
+@using Blazor.Monaco.EditorConfigurationOptions
+<div style="white-space: pre; width: 80%; height: 200px; line-break: inherit; display: block">
+    @_jsonConfig
+</div>
+@code {
+    [Parameter] public Language? Language { get; set; } 
+    [Parameter] public EditorOptions EditorOptions { get; set; } = new();
+    private string? _jsonConfig;
+    protected override void OnParametersSet()
+    {
+        EditorOptions.Language = Language??EditorOptions.Language;
+        _jsonConfig = EditorOptions.ToJson(true);
+    }
+    
+
+}
