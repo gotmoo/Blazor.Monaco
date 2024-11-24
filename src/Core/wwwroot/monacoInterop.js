@@ -9,9 +9,7 @@
     monacoConfigPath: '',
 
 
-    initializeMonacoEditorInstance: async (elementId, initialCode, language, dotnetReference) => {
-        console.log(elementId, initialCode, language);
-
+    initializeMonacoEditorInstance: async (elementId, initialCode, editorOptions, dotnetReference) => {
         if (monacoInterop.editorInstances[elementId]) {
             monacoInterop.editorInstances[elementId].dispose();
         }
@@ -21,32 +19,26 @@
             hasChanges: false,
             initialCode: initialCode
         };
-        console.table(monacoInterop.editorInstanceTracker[elementId]);
+
         let retryCounter = 0;
         const checkMonacoLoaded = () => {
             console.log("checkMonacoLoaded");
             if (window.monaco && window.monaco.editor) {
                 const editor = monaco.editor.create(
                     document.getElementById(elementId),
-                    {
-                        value: initialCode,
-                        language: language,
-                        theme: 'vs-dark'
-                    }
+                    JSON.parse(editorOptions)
                 );
+                editor.setValue(initialCode);
                 editor.onDidChangeModelContent(function () {
                     let content = editor.getValue();
                     let editorElementId = editor._domElement["id"];
-                    console.log("editorElementId: " + editorElementId);
 
                     if (monacoInterop.editorInstanceTracker[elementId].initialCode === content) {
                         monacoInterop.editorInstanceTracker[elementId].hasChanges = false;
-                        console.log("trigger callback")
                         return monacoInterop.editorInstanceTracker[elementId].netReference.invokeMethodAsync('OnEditorContentChanged', false);
                     }
                     if (!monacoInterop.editorInstanceTracker[elementId].hasChanges) {
                         monacoInterop.editorInstanceTracker[elementId].hasChanges = true;
-                        console.log("trigger callback")
                         return monacoInterop.editorInstanceTracker[elementId].netReference.invokeMethodAsync('OnEditorContentChanged', true);
                     }
                 });

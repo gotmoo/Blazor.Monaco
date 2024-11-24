@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Blazor.Monaco.EditorConfigurationOptions;
+using Microsoft.JSInterop;
 
 namespace Blazor.Monaco;
 
@@ -116,14 +117,14 @@ $$$"""
         }
     }
 
-    public async Task InitializeMonacoEditor(string elementId, string initialCode, MonacoLanguage language,
+    public async Task InitializeMonacoEditor(string elementId, string initialCode, EditorOptions options,
         DotNetObjectReference<MonacoEditor> dotnetRef)
     {
         try
         {
-            var languageStr = language.ToString().ToLower();
+            var editorOptions = options.ToJson();
             await _jsRuntime.InvokeVoidAsync("monacoInterop.initializeMonacoEditorInstance", elementId, initialCode,
-                languageStr, dotnetRef);
+                editorOptions, dotnetRef);
         }
         catch (Exception ex)
         {
