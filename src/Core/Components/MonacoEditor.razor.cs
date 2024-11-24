@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace Blazor.Monaco;
 
@@ -10,9 +11,13 @@ public partial class MonacoEditor : ComponentBase
     {
         _service = service;
     }
+    [Parameter] public required string ElementId { get; set; } 
+    [Parameter] public string? ScriptContent { get; set; }
+    [Parameter] public MonacoLanguage Language { get; set; } = MonacoLanguage.PowerShell;
+    [Parameter] public EventCallback<bool> ContentChanged { get; set; }
+    private string InitialCode => ScriptContent ?? MonacoDefaultScript.Get[Language];
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Console.WriteLine($"{DateTime.UtcNow} InteropRegistered: {_service.InteropRegistered} LoaderRegistered: {_service.LoaderRegistered} FirstLoaded: {_service.FirstLoadTime}");
 
         if (!_service.LoaderRegistered)
         {
@@ -20,7 +25,8 @@ public partial class MonacoEditor : ComponentBase
         }
         if (firstRender)
         {
+            var dotNetRef = DotNetObjectReference.Create(this);
+//            await _service.InitializeMonacoEditor(ElementId, InitialCode, Language, dotNetRef);
         }
-        Console.WriteLine($"{DateTime.UtcNow} InteropRegistered: {_service.InteropRegistered} LoaderRegistered: {_service.LoaderRegistered} FirstLoaded: {_service.FirstLoadTime}");
     }
 }
