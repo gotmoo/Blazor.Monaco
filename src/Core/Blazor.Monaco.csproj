@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <SupportedPlatform Include="browser"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\LICENSE">
+        <Link>LICENSE</Link>
+      </Content>
+      <Content Include="..\..\README.md">
+        <Link>README.md</Link>
+      </Content>
+    </ItemGroup>
+
+</Project>
