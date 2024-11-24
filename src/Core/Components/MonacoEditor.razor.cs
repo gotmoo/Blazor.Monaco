@@ -15,6 +15,8 @@ public partial class MonacoEditor : ComponentBase
     [Parameter] public string? ScriptContent { get; set; }
     [Parameter] public MonacoLanguage Language { get; set; } = MonacoLanguage.PowerShell;
     [Parameter] public EventCallback<bool> ContentChanged { get; set; }
+    public bool ContentHasChanged { get; private set; }
+
     private string InitialCode => ScriptContent ?? MonacoDefaultScript.Get[Language];
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -26,7 +28,21 @@ public partial class MonacoEditor : ComponentBase
         if (firstRender)
         {
             var dotNetRef = DotNetObjectReference.Create(this);
-//            await _service.InitializeMonacoEditor(ElementId, InitialCode, Language, dotNetRef);
+            await _service.InitializeMonacoEditor(ElementId, InitialCode, Language, dotNetRef);
         }
     }
+    [JSInvokable]
+    public async Task OnEditorContentChanged(bool contentChanged)
+    {
+        Console.WriteLine(
+            $"OnEditorContentChanged: {contentChanged}");
+        ContentHasChanged = contentChanged;
+        await NotifyParentOfContentChange();
+    }
+    private async Task NotifyParentOfContentChange()
+    {
+        Console.WriteLine($"NotifyParentOfContentChange: {ContentHasChanged}");
+        await ContentChanged.InvokeAsync(ContentHasChanged);
+    }
+
 }

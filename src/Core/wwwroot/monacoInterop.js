@@ -7,32 +7,10 @@
     isMonacoInteropScriptLoaded: true,
     isMonacoLoaderScriptLoaded: false,
     monacoConfigPath: '',
-    
 
-    loadMonacoLoaderScript: () => {
-        return new Promise((resolve, reject) => {
-            if (!monacoInterop.isMonacoLoaderScriptLoaded) {
-                // const vsLoaderScript = document.createElement('script');
-                // vsLoaderScript.src = "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js";
-                // // vsLoaderScript.src = "_content/Blazor.Monaco/min/vs/loader.js";
-                // vsLoaderScript.onload = () => {
-                    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs' } });
-                    // require.config({paths: {'vs': '_content/Blazor.Monaco/min/vs'}});
-                    require(['vs/editor/editor.main'], function () {
-                        monacoInterop.isMonacoLoaderScriptLoaded = true;
-                        resolve(true);
-                    });
-                // };
-                // vsLoaderScript.onerror = () => reject(new Error("Failed to load Monaco Editor script."));
-                // document.body.appendChild(vsLoaderScript);
-            } else {
-                resolve(true);
-            }
-        });
-    },
 
     initializeMonacoEditorInstance: async (elementId, initialCode, language, dotnetReference) => {
-        console.log(initialCode);
+        console.log(elementId, initialCode, language);
 
         if (monacoInterop.editorInstances[elementId]) {
             monacoInterop.editorInstances[elementId].dispose();
@@ -43,7 +21,10 @@
             hasChanges: false,
             initialCode: initialCode
         };
+        console.table(monacoInterop.editorInstanceTracker[elementId]);
+        let retryCounter = 0;
         const checkMonacoLoaded = () => {
+            console.log("checkMonacoLoaded");
             if (window.monaco && window.monaco.editor) {
                 const editor = monaco.editor.create(
                     document.getElementById(elementId),
@@ -57,21 +38,28 @@
                     let content = editor.getValue();
                     let editorElementId = editor._domElement["id"];
                     console.log("editorElementId: " + editorElementId);
-                    let changesChanged = false;
-                    
-                    if (monacoInterop.editorInstanceTracker[elementId].initialCode===content){
+
+                    if (monacoInterop.editorInstanceTracker[elementId].initialCode === content) {
                         monacoInterop.editorInstanceTracker[elementId].hasChanges = false;
+                        console.log("trigger callback")
                         return monacoInterop.editorInstanceTracker[elementId].netReference.invokeMethodAsync('OnEditorContentChanged', false);
                     }
-                    if (!monacoInterop.editorInstanceTracker[elementId].hasChanges){
+                    if (!monacoInterop.editorInstanceTracker[elementId].hasChanges) {
                         monacoInterop.editorInstanceTracker[elementId].hasChanges = true;
+                        console.log("trigger callback")
                         return monacoInterop.editorInstanceTracker[elementId].netReference.invokeMethodAsync('OnEditorContentChanged', true);
                     }
                 });
                 monacoInterop.editorInstances[elementId] = editor;
 
             } else {
-                setTimeout(checkMonacoLoaded, 100);
+                retryCounter++;
+                
+                if (retryCounter < 200) {
+                    setTimeout(checkMonacoLoaded, 100);
+                } else {
+                    console.warn("Failed to load editor " + elementId );
+                }
             }
         };
         checkMonacoLoaded();

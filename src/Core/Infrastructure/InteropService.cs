@@ -20,27 +20,35 @@ public class InteropService
     private Task<bool> InjectScriptAsync(string scriptSrc, string testVar)
     {
         var script =
-            $$"""
-              (() => {
-                  return new Promise((resolve, reject) => {
-                      if (!document.querySelector('script[src="{{scriptSrc}}"]')) {
-                          const scriptTag = document.createElement('script');
-                          scriptTag.src = '{{scriptSrc}}';
-                          scriptTag.onload = () => {
-                              if ({{testVar}}!==undefined) {
-                                  {{testVar}}=true;
-                              }
-                              resolve(true);
-                          };
-                          scriptTag.onerror = () => reject(new Error('Failed to load script: {{scriptSrc}}'));
-                          document.head.appendChild(scriptTag);
-                      } else {
-                          resolve(true);
-                      }
-                  });
-              })();
-              """;
-
+$$$"""
+(() => {
+    return new Promise((resolve, reject) => {
+        if (!document.querySelector('script[src="{{{scriptSrc}}}"]')) {
+            const scriptTag = document.createElement('script');
+            scriptTag.src = '{{{scriptSrc}}}';
+            scriptTag.onload = () => {
+                if ({{{testVar}}}!==undefined) {
+                    {{{testVar}}}=true;
+                }
+                if ({{{(scriptSrc == "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js").ToString().ToLower()}}}) {
+                    require.config({ paths: { 'vs': '{{{scriptSrc.Replace(@"/loader.js","")}}}' } });
+                    require(['vs/editor/editor.main'], function () {
+                        monacoInterop.monacoEditorScriptLoaded = true;
+                        console.log("Monaco Editor Scripts Loaded Successfully.");
+                        resolve(true);
+                    });
+                }
+                resolve(true);
+            };
+            scriptTag.onerror = () => reject(new Error('Failed to load script: {{{scriptSrc}}}'));
+            document.head.appendChild(scriptTag);
+            } else {
+            resolve(true);
+            }
+    });
+})();
+""";
+        Console.WriteLine(script);
         return _jsRuntime.InvokeAsync<bool>("eval", script).AsTask();
     }
 
@@ -105,6 +113,22 @@ public class InteropService
         if (!_globalState.LoaderInDom)
         {
             await WaitForMonacoLoaderAsync();
+        }
+    }
+
+    public async Task InitializeMonacoEditor(string elementId, string initialCode, MonacoLanguage language,
+        DotNetObjectReference<MonacoEditor> dotnetRef)
+    {
+        try
+        {
+            var languageStr = language.ToString().ToLower();
+            await _jsRuntime.InvokeVoidAsync("monacoInterop.initializeMonacoEditorInstance", elementId, initialCode,
+                languageStr, dotnetRef);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it as needed
+            throw new InvalidOperationException("An error occurred while initializing the Monaco Editor.", ex);
         }
     }
 }
