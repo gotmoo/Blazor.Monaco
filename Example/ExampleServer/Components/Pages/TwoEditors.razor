@@ -1,0 +1,31 @@
+﻿@page "/TwoEditors"
+@rendermode InteractiveServer
+@using Blazor.Monaco
+@using Blazor.Monaco.EditorConfigurationOptions
+
+<PageTitle>Two editors</PageTitle>
+<h1>Two editors</h1>
+<p>Page with two editors. Each have their own configuration</p>
+<div>
+    <MonacoEditor ElementId="counted-edit" Language="Language.JavaScript" EditorOptions="FirstOptions"></MonacoEditor>
+    <PrintConfiguration Language="Language.JavaScript" EditorOptions="FirstOptions"/>
+</div>
+<div>
+    <MonacoEditor ElementId="script-two" EditorOptions="SecondOptions"></MonacoEditor>
+    <PrintConfiguration EditorOptions="SecondOptions"/>
+</div>
+
+@code {
+    private EditorOptions FirstOptions = new EditorOptions();
+    private EditorOptions SecondOptions = new EditorOptions();
+    private int currentCount = 0;
+
+    protected override void OnInitialized()
+    {
+        FirstOptions.ReadOnly = false;
+        FirstOptions.WordWrap = WordWrap.On;
+        FirstOptions.Theme = Theme.VsDark;
+        FirstOptions.LineNumbers = LineNumbers.Relative;
+    }
+
+}

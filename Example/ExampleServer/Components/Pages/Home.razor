@@ -1,22 +1,40 @@
 ﻿@page "/"
 @using Blazor.Monaco
+@using Blazor.Monaco.EditorConfigurationOptions
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Blazor.Monaco examples</h1>
 
-Welcome to your new app.
-<MonacoEditor ElementId="script-one" Language="MonacoLanguage.JavaScript" ContentChanged="OnEditorContentChanged"  ></MonacoEditor>
-<p>@contentChanged</p>
-<MonacoEditor  ElementId="script-two" ></MonacoEditor>
+A simple example of a Monaco editor in a Razor component.
+<MonacoEditor ElementId="script-one" Language="Language.JavaScript" ContentChanged="OnEditorContentChanged" ScriptContent="@MyScript" @ref="_monacoEditorInstance"/>
+<div>
+    <p>Have the contents changed? @(contentChanged?"Yes":"No")</p>
+    <button @onclick="GetContentsFromEditor">Read from Editor</button> <label><InputCheckbox @bind-Value="@_readChangeReset"/> Reset changed on read?</label>
+    <button @onclick="SendContentsToEditor">Send to Editor</button>
 
+</div>
+<div>
+    <InputTextArea id="script-two" style="width: 800px; height: 300px;" @bind-Value="MyScript"></InputTextArea>
+</div>
 @code {
     private bool contentChanged { get; set; }
-
+    private string MyScript { get; set; } = string.Empty;
+    private MonacoEditor _monacoEditorInstance;
+    private bool _readChangeReset = false;
     private void OnEditorContentChanged(bool hasChanged)
     {
         contentChanged = hasChanged;
         StateHasChanged();
     }
 
+    private async Task GetContentsFromEditor()
+    {
+        MyScript = await _monacoEditorInstance.GetEditorContent(_readChangeReset);
+    }
+    private async Task SendContentsToEditor()
+    {
+         await _monacoEditorInstance.SetEditorContent(MyScript);
+    }
+    
 }
