@@ -24,8 +24,8 @@ public class EditorOptions
     public AutoClosingBrackets AutoClosingBrackets { get; set; } = AutoClosingBrackets.LanguageDefined;
     public bool MatchBrackets { get; set; } = true;
     public MinimapOptions Minimap { get; set; } = new MinimapOptions();
-    internal string ToJson()
+    internal string ToJson(bool prettyPrint = false)
     {
-        return this.ToJsonWithEnumDescription();
+        return this.ToJsonWithEnumDescription(prettyPrint);
     }
 }
