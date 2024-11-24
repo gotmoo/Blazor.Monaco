@@ -6,5 +6,17 @@
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
-<MonacoEditor ElementId="script-one" Language="MonacoLanguage.JavaScript"  ></MonacoEditor>
+<MonacoEditor ElementId="script-one" Language="MonacoLanguage.JavaScript" ContentChanged="OnEditorContentChanged"  ></MonacoEditor>
+<p>@contentChanged</p>
 <MonacoEditor  ElementId="script-two" ></MonacoEditor>
+
+@code {
+    private bool contentChanged { get; set; }
+
+    private void OnEditorContentChanged(bool hasChanged)
+    {
+        contentChanged = hasChanged;
+        StateHasChanged();
+    }
+
+}
