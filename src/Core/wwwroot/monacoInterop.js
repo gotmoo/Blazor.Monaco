@@ -46,39 +46,36 @@
 
             } else {
                 retryCounter++;
-                
                 if (retryCounter < 200) {
                     setTimeout(checkMonacoLoaded, 100);
                 } else {
-                    console.warn("Failed to load editor " + elementId );
+                    console.warn("Failed to load editor " + elementId);
                 }
             }
         };
         checkMonacoLoaded();
     },
-    // // Set a callback function to be invoked when the content changes
-    // setContentChangeCallback: function (elementId, dotNetHelper) {
-    //     const editor = monacoInterop.editorInstances[elementId];
-    //     if (editor) {
-    //         editor.onDidChangeModelContent(() => {
-    //             const content = editor.getValue();
-    //             dotNetHelper.invokeMethodAsync('NotifyContentChange', content);
-    //         });
-    //     }
-    // }, 
     getEditorContent: function (elementId) {
         const editor = monacoInterop.editorInstances[elementId];
         if (editor) {
             return editor.getValue();
         }
         return null;
-    }, 
+    },
     setEditorContent: function (elementId, newContent) {
         const editor = monacoInterop.editorInstances[elementId];
         if (editor) {
             monacoInterop.editorInstanceTracker[elementId].hasChanges = false;
             monacoInterop.editorInstanceTracker[elementId].initialCode = newContent;
             return editor.setValue(newContent);
+        }
+        return null;
+    },
+    updateEditorConfiguration: function (elementId, newConfiguration) {
+        const editor = monacoInterop.editorInstances[elementId];
+        if (editor) {
+            editor.updateOptions(JSON.parse(newConfiguration));
+            monacoInterop.editorInstances[elementId] = editor;
         }
         return null;
     }
