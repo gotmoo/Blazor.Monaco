@@ -13,7 +13,7 @@ public partial class MonacoEditor : ComponentBase
         _service = service;
     }
 
-    [Parameter] public required string ElementId { get; set; }
+    [Parameter] public string ElementId { get; set; }
     [Parameter] public string? ScriptContent { get; set; }
     [Parameter] public Language? Language { get; set; }
     [Parameter] public EventCallback<bool> ContentChanged { get; set; }
@@ -64,9 +64,18 @@ public partial class MonacoEditor : ComponentBase
         await NotifyParentOfContentChange();
     }
 
-    public async Task<string> GetEditorContent()
+    public async Task<string> GetEditorContent(bool resetChangedOnRead = false)
     {
-        return await _service.GetEditorContent(ElementId);
+        var newContent = await _service.GetEditorContent(ElementId);
+        if (resetChangedOnRead)
+        {
+            ContentHasChanged = false;
+            InitialCode = newContent;
+            ScriptContent = newContent;   
+            await NotifyParentOfContentChange();
+        }
+
+        return newContent;
     }
 
     public async Task UpdateEditorConfiguration(EditorOptions newConfig)
