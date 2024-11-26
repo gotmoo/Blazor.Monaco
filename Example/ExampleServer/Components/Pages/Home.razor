@@ -19,7 +19,7 @@ A simple example of a Monaco editor in a Razor component.
 @code {
     private bool contentChanged { get; set; }
     private string MyScript { get; set; } = string.Empty;
-    private MonacoEditor _monacoEditorInstance;
+    private MonacoEditor _monacoEditorInstance = null!;
     private bool _readChangeReset = false;
     private void OnEditorContentChanged(bool hasChanged)
     {

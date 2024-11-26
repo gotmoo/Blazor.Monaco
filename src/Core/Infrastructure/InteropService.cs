@@ -6,7 +6,6 @@ public class InteropService
 {
     private readonly GlobalState _globalState;
     private readonly IJSRuntime _jsRuntime;
-    private bool _interopRegistered = false;
     public bool InteropRegistered => _globalState.InteropInDom;
     public bool LoaderRegistered => _globalState.LoaderInDom;
     public DateTime? FirstLoadTime => _globalState.FirstLoadTime;
