@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Blazor.Monaco.EditorConfigurationOptions;
+namespace Blazor.Monaco;
 
 public enum MinimapSize
 {

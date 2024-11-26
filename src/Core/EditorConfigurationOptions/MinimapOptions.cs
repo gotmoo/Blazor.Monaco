@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Blazor.Monaco.EditorConfigurationOptions;
+namespace Blazor.Monaco;
 
 public class MinimapOptions
 {

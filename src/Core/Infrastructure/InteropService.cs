@@ -1,5 +1,4 @@
-﻿using Blazor.Monaco.EditorConfigurationOptions;
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace Blazor.Monaco;
 

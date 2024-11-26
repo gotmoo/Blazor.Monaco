@@ -1,6 +1,4 @@
-﻿using Blazor.Monaco.EditorConfigurationOptions;
-
-namespace Blazor.Monaco;
+﻿namespace Blazor.Monaco;
 
 public static class MonacoDefaultScript
 {
