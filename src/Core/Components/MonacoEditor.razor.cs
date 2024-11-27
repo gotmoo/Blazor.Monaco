@@ -5,6 +5,9 @@ namespace Blazor.Monaco;
 
 public partial class MonacoEditor : ComponentBase
 {
+    private DotNetObjectReference<MonacoEditor>? _dotNetHelper = null;
+    private IJSObjectReference _jsModule = default!;
+
     private readonly InteropService _service;
 
     public MonacoEditor(InteropService service)
@@ -34,6 +37,8 @@ public partial class MonacoEditor : ComponentBase
 
         if (firstRender)
         {
+            _dotNetHelper = DotNetObjectReference.Create(this);
+
             var dotNetRef = DotNetObjectReference.Create(this);
             EditorOptions.Language = Language ?? EditorOptions.Language;
             _initialCode = !string.IsNullOrWhiteSpace(ScriptContent)

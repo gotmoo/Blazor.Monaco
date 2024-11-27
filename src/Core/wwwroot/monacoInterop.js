@@ -7,7 +7,11 @@
     isMonacoInteropScriptLoaded: true,
     isMonacoLoaderScriptLoaded: false,
     monacoConfigPath: '',
+    printHello: async () => {
+        let response = prompt("Hey!");
 
+        console.log("Hello World, "+ response);
+    },
 
     initializeMonacoEditorInstance: async (elementId, initialCode, editorOptions, dotnetReference) => {
         if (monacoInterop.editorInstances[elementId]) {
@@ -24,6 +28,7 @@
         const checkMonacoLoaded = () => {
             console.log("checkMonacoLoaded");
             if (window.monaco && window.monaco.editor) {
+                
                 const editor = monaco.editor.create(
                     document.getElementById(elementId),
                     JSON.parse(editorOptions)
