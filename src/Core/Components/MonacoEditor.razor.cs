@@ -66,26 +66,27 @@ public partial class MonacoEditor : ComponentBase
     public async Task SetEditorContent(string newContent)
     {
         await _service.SetEditorContent(ElementId, newContent);
-        ContentHasChanged = false;
-        _initialCode = newContent;
-        ScriptContent = newContent;
-        await NotifyParentOfContentChange();
+        await ResetChangeTracker(newContent);
     }
 
     public async Task<string> GetEditorContent(bool resetChangedOnRead = false)
     {
-        var newContent = await _service.GetEditorContent(ElementId);
+        var newContent = await _service.GetEditorContent(ElementId, resetChangedOnRead);
         if (resetChangedOnRead)
         {
-            ContentHasChanged = false;
-            _initialCode = newContent;
-            ScriptContent = newContent;   
-            await NotifyParentOfContentChange();
+            await ResetChangeTracker(newContent);
         }
 
         return newContent;
     }
 
+    private async Task ResetChangeTracker(string newContent)
+    {
+        ContentHasChanged = false;
+        _initialCode = newContent;
+        ScriptContent = newContent;
+        await NotifyParentOfContentChange();
+    }
     public async Task UpdateEditorConfiguration(EditorOptions newConfig)
     {
         await _service.UpdateEditorConfiguration(ElementId, newConfig);

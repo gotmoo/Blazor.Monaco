@@ -21,72 +21,45 @@ public class InteropService
         _libraryConfiguration = libraryConfiguration;
     }
 
-    private Task<bool> InjectScriptAsync(string scriptName, string scriptSrc = "local")
+    private Task<bool> InjectScriptAsync(string monacoLoaderSource = "local")
     {
         var script =
             $$$"""
-               ((scriptName, cdnPath = "local") => {
+               ((loaderSource) => {
                    return new Promise((resolve, reject) => {
-                       let script = document.querySelector(`script[src*="{scriptName}"]`)
-                       const inDom = (script);
+                       let scriptName = "monacoInterop";
+                       let interopScriptTag = document.querySelector(`script[src*="{scriptName}"]`)
+                       const inDom = (interopScriptTag !== null);
                        if (!inDom) {
-                           script = document.createElement("script");
-                           let resolvedPath = cdnPath;
+                           interopScriptTag = document.createElement("script");
+                           const importMap = JSON.parse(document.querySelector('script[type="importmap"]').textContent).imports;
+                           const partialMatchKey = Object.keys(importMap).find(key => key.includes(scriptName));
                
-                           if (cdnPath.substring(0,4) !== "http") {
-                               const importMap = JSON.parse(document.querySelector('script[type="importmap"]').textContent).imports;
-                               const partialMatchKey = Object.keys(importMap).find(key => key.includes(scriptName));
-               
-                               if (!partialMatchKey) {
-                                   script.onerror = () => reject(new Error('Failed to load script: ' + scriptName));
-                               }
-                               resolvedPath = importMap[partialMatchKey].replace("./", "/");
+                           if (!partialMatchKey) {
+                               interopScriptTag.onerror = () => reject(new Error('Failed to load script: ' + scriptName));
                            }
-                           script.src = resolvedPath;
-                           script.type = "module";
-                           console.log("About to load" + scriptName);
-                           script.onload = () => () => {
-                            console.log("loading" + scriptName);
-                           
-                               if (scriptName === "loader") {
-                                   const regex = /\/loader\.js$/i;
-                                   const configPath = resolvedPath.replace(regex, '');
-                                    console.log("About to configPath" + configPath);
-                                   require.config({paths: {'vs': configPath}});
-                                   require(['vs/editor/editor.main'], function () {
-                                       monacoInterop.monacoEditorScriptLoaded = true;
-                                       console.log("Monaco Editor Scripts Loaded Successfully.");
-                                   });
-                               }
+                           resolvedPath = importMap[partialMatchKey].replace("./", "/");
+                           interopScriptTag.src = resolvedPath;
+                           interopScriptTag.type = "module";
+                           console.log("About to load " + scriptName); 1
+                           interopScriptTag.onload = () => {
+                               window.monacoInterop.setMonacoLoaderSource(loaderSource); 
+                               console.table(monacoInterop)
                                resolve(true);
                            };
-                           script.onerror = () => reject(new Error('Failed to load script: ' + scriptName));
-                           document.head.appendChild(script);
-                       } else {
-                           if (scriptName === "loader") {
-                               const regex = /\/loader\.js$/i;
-                               const configPath = resolvedPath.replace(regex, '');
-                               console.log(configPath);
-                               require.config({paths: {'vs': configPath}});
-                               require(['vs/editor/editor.main'], function () {
-                                   monacoInterop.monacoEditorScriptLoaded = true;
-                                   console.log("Monaco Editor Scripts Loaded Successfully.");
-                               });
-                           }
-                       }
-                       resolve(true);
+                           interopScriptTag.onerror = () => reject(new Error('Failed to load script: ' + scriptName));
+                           document.head.appendChild(interopScriptTag);
+                       } 
                    });
-               
-               })("{{{scriptName}}}","{{{scriptSrc}}}");
+               })("{{{monacoLoaderSource}}}");
                """;
-         Console.WriteLine(script);
         return _jsRuntime.InvokeAsync<bool>("eval", script).AsTask();
     }
 
-    private async Task<bool> LoadAndVerifyScriptAsync(string scriptName ,string scriptSrc, string verifyFunction, TimeSpan timeout,
+    private async Task<bool> LoadAndVerifyScriptAsync(string scriptSrc, string verifyFunction, TimeSpan timeout,
         TimeSpan pollInterval)
     {
-        var scriptLoadTask = InjectScriptAsync(scriptName, scriptSrc);
+        var scriptLoadTask = InjectScriptAsync(scriptSrc);
         var startTime = DateTime.UtcNow;
 
         while (DateTime.UtcNow - startTime < timeout)
@@ -102,83 +75,14 @@ public class InteropService
         return false;
     }
 
-    private async Task WaitForMonacoLoaderAsync()
-    {
-        var isInteropScriptLoaded = await LoadAndVerifyScriptAsync(
-            "loader",
-            "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js",
-            "monacoInterop.isMonacoLoaderScriptLoaded",
-            TimeSpan.FromSeconds(10),
-            TimeSpan.FromMilliseconds(100));
-
-        if (!isInteropScriptLoaded)
-        {
-            throw new InvalidOperationException("Failed to load Monaco Interop script within the timeout period.");
-        }
-
-        _globalState.LoaderInDom = true;
-    }
-
-    private async Task InitializeInterop()
-    {
-        var jsFile = "./_content/Blazor.Monaco.Test/monacoInterop.js";
-        var script =
-               """
-               ((scriptName) => {
-                   return new Promise((resolve, reject) => {
-                   document.querySelector(`script[src*="{scriptName}"]`)
-                       const importMap = JSON.parse(document.querySelector('script[type="importmap"]').textContent).imports;
-                       const partialMatchKey = Object.keys(importMap).find(key => key.includes(scriptName));
-                       
-                       if (partialMatchKey) {
-                           const resolvedPath = importMap[partialMatchKey].replace("./","/");
-                           const script = document.createElement("script");
-                           script.src = resolvedPath;
-                           script.type = "module";
-                           script.onload = () => () => {
-                            if (scriptName === "loader.js"){
-                                
-                            }
-                           //    if ({{testVar}}}!==undefined) {
-                           //        {{testVar}}}=true;
-                           //    }
-                           //    if ({{(scriptSrc == "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js").ToString().ToLower()}}}) {
-                           //        require.config({ paths: { 'vs': '{{scriptSrc.Replace(@"/loader.js", "")}}}' } });
-                           //        require(['vs/editor/editor.main'], function () {
-                           //            monacoInterop.monacoEditorScriptLoaded = true;
-                           //            console.log("Monaco Editor Scripts Loaded Successfully.");
-                           //            resolve(true);
-                           //        });
-                           //    }
-                               resolve(true);
-                           };
-                           script.onerror = () => reject(new Error('Failed to load script: monacoInterop.js'));
-                           document.head.appendChild(script);
-                       } else {
-                           script.onerror = () => reject(new Error('Failed to load script: monacoInterop.js'));
-                       }
-                   });
-               })();
-               """;
-        Console.WriteLine(JAVASCRIPT_FILE.FormatCollocatedUrl(_libraryConfiguration));
-        await _jsRuntime.InvokeVoidAsync("eval", $"console.log('{jsFile}');");
-        var loadScriptResponse = await _jsRuntime.InvokeAsync<bool>("eval", script);
-        Console.WriteLine( $"loadScriptResponse {loadScriptResponse}");
-        _jsModule = await _jsRuntime.InvokeAsync<IJSObjectReference>("load",
-            JAVASCRIPT_FILE.FormatCollocatedUrl(_libraryConfiguration));
-        _globalState.InteropInDom = true;
-        await _jsModule.InvokeVoidAsync("monacoInterop.printHello");
-    }
 
     private async Task WaitForMonacoInteropAsync()
     {
         var isInteropScriptLoaded = await LoadAndVerifyScriptAsync(
-            "monacoInterop",
-            "local",
-            "monacoInterop.isMonacoInteropScriptLoaded",
+            "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js",
+            "monacoInterop.testIsMonacoLoaded()",
             TimeSpan.FromSeconds(10),
             TimeSpan.FromMilliseconds(100));
-
         if (!isInteropScriptLoaded)
         {
             throw new InvalidOperationException("Failed to load Monaco Interop script within the timeout period.");
@@ -193,11 +97,6 @@ public class InteropService
         {
             // await InitializeInterop();
             await WaitForMonacoInteropAsync();
-        }
-
-        if (!_globalState.LoaderInDom)
-        {
-            await WaitForMonacoLoaderAsync();
         }
     }
 
@@ -222,9 +121,9 @@ public class InteropService
         await _jsRuntime.InvokeVoidAsync("monacoInterop.setEditorContent", elementId, newContent);
     }
 
-    public async Task<string> GetEditorContent(string elementId)
+    public async Task<string> GetEditorContent(string elementId, bool resetChangedOnRead = false)
     {
-        return await _jsRuntime.InvokeAsync<string>("monacoInterop.getEditorContent", elementId);
+        return await _jsRuntime.InvokeAsync<string>("monacoInterop.getEditorContent", elementId, resetChangedOnRead);
     }
 
     public async Task UpdateEditorConfiguration(string elementId, EditorOptions editorOptions)
