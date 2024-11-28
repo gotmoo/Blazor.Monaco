@@ -6,8 +6,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <IsTrimmable>true</IsTrimmable>
         <IsPackable>true</IsPackable>
-        <PackageId>Blazor.Monaco.Test.001-alpha</PackageId>
-        <Version>0.0.1</Version>
+        <PackageId>Blazor.Monaco</PackageId>
+        <Version>0.0.2-alpha</Version>
         <Authors>Johan Greefkes</Authors>
         <Company>Zomaar</Company>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
