@@ -4,9 +4,6 @@ namespace Blazor.Monaco;
 
 public class InteropService
 {
-    private const string JAVASCRIPT_FILE = "./_content/Blazor.Monaco.Test/monacoInterop.js";
-    private IJSObjectReference _jsModule = default!;
-
     private readonly GlobalState _globalState;
     private readonly IJSRuntime _jsRuntime;
     private readonly LibraryConfiguration _libraryConfiguration;
