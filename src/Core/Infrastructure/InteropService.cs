@@ -6,55 +6,57 @@ public class InteropService
 {
     private readonly GlobalState _globalState;
     private readonly IJSRuntime _jsRuntime;
+    private readonly LibraryConfiguration _libraryConfiguration;
     public bool InteropRegistered => _globalState.InteropInDom;
     public bool LoaderRegistered => _globalState.LoaderInDom;
     public DateTime? FirstLoadTime => _globalState.FirstLoadTime;
 
-    public InteropService(GlobalState globalState, IJSRuntime jsRuntime)
+    public InteropService(GlobalState globalState, IJSRuntime jsRuntime, LibraryConfiguration libraryConfiguration)
     {
         _globalState = globalState;
         _jsRuntime = jsRuntime;
+        _libraryConfiguration = libraryConfiguration;
     }
 
-    private Task<bool> InjectScriptAsync(string scriptSrc, string testVar)
+    private Task<bool> InjectScriptAsync(string monacoLoaderSource = "local")
     {
         var script =
             $$$"""
-               (() => {
+               ((loaderSource) => {
                    return new Promise((resolve, reject) => {
-                       if (!document.querySelector('script[src="{{{scriptSrc}}}"]')) {
-                           const scriptTag = document.createElement('script');
-                           scriptTag.src = '{{{scriptSrc}}}';
-                           scriptTag.onload = () => {
-                               if ({{{testVar}}}!==undefined) {
-                                   {{{testVar}}}=true;
-                               }
-                               if ({{{(scriptSrc == "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js").ToString().ToLower()}}}) {
-                                   require.config({ paths: { 'vs': '{{{scriptSrc.Replace(@"/loader.js", "")}}}' } });
-                                   require(['vs/editor/editor.main'], function () {
-                                       monacoInterop.monacoEditorScriptLoaded = true;
-                                       console.log("Monaco Editor Scripts Loaded Successfully.");
-                                       resolve(true);
-                                   });
-                               }
+                       let scriptName = "monacoInterop";
+                       let interopScriptTag = document.querySelector(`script[src*="{scriptName}"]`)
+                       const inDom = (interopScriptTag !== null);
+                       if (!inDom) {
+                           interopScriptTag = document.createElement("script");
+                           const importMap = JSON.parse(document.querySelector('script[type="importmap"]').textContent).imports;
+                           const partialMatchKey = Object.keys(importMap).find(key => key.includes(scriptName));
+               
+                           if (!partialMatchKey) {
+                               interopScriptTag.onerror = () => reject(new Error('Failed to load script: ' + scriptName));
+                           }
+                           resolvedPath = importMap[partialMatchKey].replace("./", "/");
+                           interopScriptTag.src = resolvedPath;
+                           interopScriptTag.type = "module";
+                           console.log("About to load " + scriptName); 1
+                           interopScriptTag.onload = () => {
+                               window.monacoInterop.setMonacoLoaderSource(loaderSource); 
+                               console.table(monacoInterop)
                                resolve(true);
                            };
-                           scriptTag.onerror = () => reject(new Error('Failed to load script: {{{scriptSrc}}}'));
-                           document.head.appendChild(scriptTag);
-                           } else {
-                           resolve(true);
-                           }
+                           interopScriptTag.onerror = () => reject(new Error('Failed to load script: ' + scriptName));
+                           document.head.appendChild(interopScriptTag);
+                       } 
                    });
-               })();
+               })("{{{monacoLoaderSource}}}");
                """;
-        // Console.WriteLine(script);
         return _jsRuntime.InvokeAsync<bool>("eval", script).AsTask();
     }
 
     private async Task<bool> LoadAndVerifyScriptAsync(string scriptSrc, string verifyFunction, TimeSpan timeout,
         TimeSpan pollInterval)
     {
-        var scriptLoadTask = InjectScriptAsync(scriptSrc, verifyFunction);
+        var scriptLoadTask = InjectScriptAsync(scriptSrc);
         var startTime = DateTime.UtcNow;
 
         while (DateTime.UtcNow - startTime < timeout)
@@ -70,30 +72,14 @@ public class InteropService
         return false;
     }
 
-    private async Task WaitForMonacoLoaderAsync()
-    {
-        var isInteropScriptLoaded = await LoadAndVerifyScriptAsync(
-            "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js",
-            "monacoInterop.isMonacoLoaderScriptLoaded",
-            TimeSpan.FromSeconds(10),
-            TimeSpan.FromMilliseconds(100));
-
-        if (!isInteropScriptLoaded)
-        {
-            throw new InvalidOperationException("Failed to load Monaco Interop script within the timeout period.");
-        }
-
-        _globalState.LoaderInDom = true;
-    }
 
     private async Task WaitForMonacoInteropAsync()
     {
         var isInteropScriptLoaded = await LoadAndVerifyScriptAsync(
-            "_content/Blazor.Monaco/monacoInterop.js",
-            "monacoInterop.isMonacoInteropScriptLoaded",
+            "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js",
+            "monacoInterop.testIsMonacoLoaded()",
             TimeSpan.FromSeconds(10),
             TimeSpan.FromMilliseconds(100));
-
         if (!isInteropScriptLoaded)
         {
             throw new InvalidOperationException("Failed to load Monaco Interop script within the timeout period.");
@@ -106,12 +92,8 @@ public class InteropService
     {
         if (!_globalState.InteropInDom)
         {
+            // await InitializeInterop();
             await WaitForMonacoInteropAsync();
-        }
-
-        if (!_globalState.LoaderInDom)
-        {
-            await WaitForMonacoLoaderAsync();
         }
     }
 
@@ -136,11 +118,11 @@ public class InteropService
         await _jsRuntime.InvokeVoidAsync("monacoInterop.setEditorContent", elementId, newContent);
     }
 
-    public async Task<string> GetEditorContent(string elementId)
+    public async Task<string> GetEditorContent(string elementId, bool resetChangedOnRead = false)
     {
-        return await _jsRuntime.InvokeAsync<string>("monacoInterop.getEditorContent", elementId);
+        return await _jsRuntime.InvokeAsync<string>("monacoInterop.getEditorContent", elementId, resetChangedOnRead);
     }
-    
+
     public async Task UpdateEditorConfiguration(string elementId, EditorOptions editorOptions)
     {
         await _jsRuntime.InvokeVoidAsync("monacoInterop.updateEditorConfiguration", elementId, editorOptions);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace Blazor.Monaco;
 
@@ -12,6 +13,7 @@ public class GlobalState
     public StandardLuminance Luminance { get; set; } = StandardLuminance.LightMode;
     public bool InteropInDom { get; set; }
     public bool LoaderInDom { get; set; }
+    public IJSObjectReference JsObjectReference { get; set; } = default!;
     public DateTime? FirstLoadTime { get; set; }
     public string? Color { get; set; }
 

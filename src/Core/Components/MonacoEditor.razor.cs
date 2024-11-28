@@ -5,6 +5,7 @@ namespace Blazor.Monaco;
 
 public partial class MonacoEditor : ComponentBase
 {
+    private DotNetObjectReference<MonacoEditor>? _dotNetHelper = null;
     private readonly InteropService _service;
 
     public MonacoEditor(InteropService service)
@@ -34,6 +35,8 @@ public partial class MonacoEditor : ComponentBase
 
         if (firstRender)
         {
+            _dotNetHelper = DotNetObjectReference.Create(this);
+
             var dotNetRef = DotNetObjectReference.Create(this);
             EditorOptions.Language = Language ?? EditorOptions.Language;
             _initialCode = !string.IsNullOrWhiteSpace(ScriptContent)
@@ -61,26 +64,27 @@ public partial class MonacoEditor : ComponentBase
     public async Task SetEditorContent(string newContent)
     {
         await _service.SetEditorContent(ElementId, newContent);
-        ContentHasChanged = false;
-        _initialCode = newContent;
-        ScriptContent = newContent;
-        await NotifyParentOfContentChange();
+        await ResetChangeTracker(newContent);
     }
 
     public async Task<string> GetEditorContent(bool resetChangedOnRead = false)
     {
-        var newContent = await _service.GetEditorContent(ElementId);
+        var newContent = await _service.GetEditorContent(ElementId, resetChangedOnRead);
         if (resetChangedOnRead)
         {
-            ContentHasChanged = false;
-            _initialCode = newContent;
-            ScriptContent = newContent;   
-            await NotifyParentOfContentChange();
+            await ResetChangeTracker(newContent);
         }
 
         return newContent;
     }
 
+    private async Task ResetChangeTracker(string newContent)
+    {
+        ContentHasChanged = false;
+        _initialCode = newContent;
+        ScriptContent = newContent;
+        await NotifyParentOfContentChange();
+    }
     public async Task UpdateEditorConfiguration(EditorOptions newConfig)
     {
         await _service.UpdateEditorConfiguration(ElementId, newConfig);
