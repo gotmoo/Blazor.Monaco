@@ -4,29 +4,35 @@
 
 <h1>Blazor.Monaco examples</h1>
 
-A simple example of a Monaco editor in a Razor component.
-<MonacoEditor ElementId="script-one"
-              Language="Language.JavaScript"
-              OnContentChanged="OnEditorContentChanged"
-              OnSaveRequested="OnEditorSaveRequested"
-              ScriptContent="@MyScript"
-              @ref="_monacoEditorInstance"
-/>
-<div>
-    <div class="alert alert-info">Have the contents changed? @(ContentChanged ? "Yes" : "No")
-        @if (_showSaveMessage)
-        {
-            <span class="alert alert-success">Saved!</span>
-        }
+<p>Monaco editor in a Razor component with Change and Save handling.</p>
+<div class="card card-body example-spacing" style="width: fit-content; background-color: #cff4fc;">
+    <MonacoEditor ElementId="script-one"
+                  Language="Language.JavaScript"
+                  OnContentChanged="OnEditorContentChanged"
+                  OnSaveRequested="OnEditorSaveRequested"
+                  ScriptContent="@MyScript"
+                  @ref="_monacoEditorInstance"
+                  Style="width:800px; height:400px;"
+    />
+    <div class="card card-body example-spacing" style="background-color: #20c997; margin-top:  1em;">
+        <div class="alert alert-info col-5">Have the contents changed? @(ContentChanged ? "Yes" : "No")
+            @if (_showSaveMessage)
+            {
+                <span class="alert alert-success">Saved!</span>
+            }
+        </div>
+        <div class="row-cols-auto">
+            <button class="btn btn-light" @onclick="GetContentsFromEditor">Read from Editor</button>
+            <label class="form-check-label">
+                <InputCheckbox class="form-check-input" @bind-Value="@_readChangeReset"/>
+                Reset changed on read?</label>
+            <button class="btn btn-light" @onclick="SendContentsToEditor">Send to Editor</button>
+        </div>
     </div>
-    <button @onclick="GetContentsFromEditor">Read from Editor</button>
-    <label>
-        <InputCheckbox @bind-Value="@_readChangeReset"/>
-        Reset changed on read?</label>
-    <button @onclick="SendContentsToEditor">Send to Editor</button>
 </div>
-<div>
-    <InputTextArea id="script-two" style="width: 800px; height: 300px;" @bind-Value="MyScript"></InputTextArea>
+<div class="example-spacing">
+    <InputTextArea class="form-control" id="script-two" style="width: 800px; height: 300px; font-family: monospace;"
+                   @bind-Value="MyScript"></InputTextArea>
 </div>
 
 @code {
