@@ -7,7 +7,7 @@
         <IsTrimmable>true</IsTrimmable>
         <IsPackable>true</IsPackable>
         <PackageId>Blazor.Monaco</PackageId>
-        <Version>0.0.4-alpha</Version>
+        <Version>0.0.5-alpha</Version>
         <Authors>Johan Greefkes</Authors>
         <Company>Zomaar</Company>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
