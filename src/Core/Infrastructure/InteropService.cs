@@ -125,6 +125,6 @@ public class InteropService
 
     public async Task UpdateEditorConfiguration(string elementId, EditorOptions editorOptions)
     {
-        await _jsRuntime.InvokeVoidAsync("monacoInterop.updateEditorConfiguration", elementId, editorOptions);
+        await _jsRuntime.InvokeVoidAsync("monacoInterop.updateEditorConfiguration", elementId, editorOptions.ToJson());
     }
 }
