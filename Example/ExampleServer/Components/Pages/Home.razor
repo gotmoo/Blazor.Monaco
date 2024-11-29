@@ -1,28 +1,55 @@
 ﻿@page "/"
 @using Blazor.Monaco
-
 <PageTitle>Home</PageTitle>
 
 <h1>Blazor.Monaco examples</h1>
 
 A simple example of a Monaco editor in a Razor component.
-<MonacoEditor ElementId="script-one" Language="Language.JavaScript" ContentChanged="OnEditorContentChanged" ScriptContent="@MyScript" @ref="_monacoEditorInstance"/>
+<MonacoEditor ElementId="script-one"
+              Language="Language.JavaScript"
+              OnContentChanged="OnEditorContentChanged"
+              OnSaveRequested="OnEditorSaveRequested"
+              ScriptContent="@MyScript"
+              @ref="_monacoEditorInstance"
+/>
 <div>
-    <p>Have the contents changed? @(ContentChanged?"Yes":"No")</p>
-    <button @onclick="GetContentsFromEditor">Read from Editor</button> <label><InputCheckbox @bind-Value="@_readChangeReset"/> Reset changed on read?</label>
+    <div class="alert alert-info">Have the contents changed? @(ContentChanged ? "Yes" : "No")
+        @if (_showSaveMessage)
+        {
+            <span class="alert alert-success">Saved!</span>
+        }
+    </div>
+    <button @onclick="GetContentsFromEditor">Read from Editor</button>
+    <label>
+        <InputCheckbox @bind-Value="@_readChangeReset"/>
+        Reset changed on read?</label>
     <button @onclick="SendContentsToEditor">Send to Editor</button>
 </div>
 <div>
     <InputTextArea id="script-two" style="width: 800px; height: 300px;" @bind-Value="MyScript"></InputTextArea>
 </div>
+
 @code {
     private bool ContentChanged { get; set; }
     private string MyScript { get; set; } = string.Empty;
     private MonacoEditor _monacoEditorInstance = null!;
-    private bool _readChangeReset = false;
+    private bool _readChangeReset;
+    private bool _showSaveMessage;
+
     private void OnEditorContentChanged(bool hasChanged)
     {
+        Console.WriteLine($"OnEditorContentChanged: {hasChanged}");
         ContentChanged = hasChanged;
+    }
+
+    private async Task OnEditorSaveRequested()
+    {
+        Console.WriteLine("OnEditorSaveRequested");
+        MyScript = await _monacoEditorInstance.GetEditorContent(resetChangedOnRead: true);
+        _showSaveMessage = true;
+        StateHasChanged();
+        await Task.Delay(5000); // Wait for 5 seconds
+        _showSaveMessage = false;
         StateHasChanged();
     }
 
@@ -30,9 +57,10 @@ A simple example of a Monaco editor in a Razor component.
     {
         MyScript = await _monacoEditorInstance.GetEditorContent(_readChangeReset);
     }
+
     private async Task SendContentsToEditor()
     {
-         await _monacoEditorInstance.SetEditorContent(MyScript);
+        await _monacoEditorInstance.SetEditorContent(MyScript);
     }
-    
+
 }
