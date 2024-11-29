@@ -19,6 +19,8 @@ public partial class MonacoEditor : ComponentBase
     [Parameter] public EventCallback<bool> OnContentChanged { get; set; }
     [Parameter] public EventCallback OnSaveRequested { get; set; }
     [Parameter] public EditorOptions EditorOptions { get; set; } = new();
+    [Parameter] public string? Style { get; set; } 
+    [Parameter] public string? Class { get; set; }
     public bool ContentHasChanged { get; private set; }
 
     private string _initialCode = string.Empty;
