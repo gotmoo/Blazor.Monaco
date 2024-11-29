@@ -1,0 +1,246 @@
+﻿@using Blazor.Monaco
+@using System.ComponentModel
+@using Microsoft.AspNetCore.Components.Forms
+@page "/ChangingConfiguration"
+
+<h3>Changing Configuration</h3>
+<p>Demo of the supported options. While some settings can be dynamically applied, the whole editor is re-initialized each time to allow language changes to apply properly.</p>
+<div class="row">
+    <div class="col-8">
+        <div class="card example-spacing" style=" background-color: #cff4fc;">
+            <div class="card-body">
+                <MonacoEditor
+                    EditorOptions="MyOptions"
+                    ScriptContent="@_scriptContents"
+                    Language="Language.CSharp"
+                    ElementId="change-config"
+                    Style="width: auto; height: 600px;"
+                    @ref="_monacoEditor"
+                />
+            </div>
+        </div>
+        <div class="row example-spacing">
+            <div class="row-cols-auto">
+                <button class="btn btn-primary" type="button" @onclick="() => _showConfig1 = !_showConfig1">
+                    Show Applied Options
+                </button>
+                <button class="btn btn-primary" type="button" @onclick="HandleValidSubmit">Apply Options</button>
+            </div>
+
+            @if (_showConfig1)
+            {
+                <div class="col example-spacing">
+                    <pre><code><PrintConfiguration EditorOptions="MyOptions"/></code></pre>
+                </div>
+            }
+        </div>
+
+    </div>
+    <div class="col-3 overflow-y-scroll " style="height: 80vh; background-color: #31d2f2; margin: 0.3em; border-radius: 0.5em;">
+        <EditForm Model="MyOptions" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <h3>Options</h3>
+
+            <div class="form-group">
+                <label for="Language">Language:</label>
+                <InputSelect id="Language" @bind-Value="MyOptions.Language" class="form-control">
+                    @foreach (var lang in Enum.GetValues<Language>())
+                    {
+                        <option value="@lang">@lang.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group">
+                <label for="LineNumbers">Line Numbers:</label>
+                <InputSelect id="LineNumbers" @bind-Value="MyOptions.LineNumbers" class="form-control">
+                    @foreach (var ln in Enum.GetValues<LineNumbers>())
+                    {
+                        <option value="@ln">@ln.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group">
+                <label for="LineNumbersMinChars">Line Numbers Min Chars:</label>
+                <InputNumber id="LineNumbersMinChars" @bind-Value="MyOptions.LineNumbersMinChars" class="form-control"/>
+            </div>
+
+            <div class="form-group">
+                <InputCheckbox id="RoundedSelection" @bind-Value="MyOptions.RoundedSelection"/>
+                <label for="RoundedSelection">Rounded Selection</label>
+            </div>
+
+
+            <div class="form-group">
+                <InputCheckbox id="ScrollBeyondLastLine" @bind-Value="MyOptions.ScrollBeyondLastLine"/>
+                <label for="ScrollBeyondLastLine">Scroll Beyond Last Line</label>
+            </div>
+
+            <div class="form-group">
+                <label for="ScrollBeyondLastColumn">Scroll Beyond Last Column:</label>
+                <InputNumber id="ScrollBeyondLastColumn" @bind-Value="MyOptions.ScrollBeyondLastColumn"
+                             class="form-control"/>
+            </div>
+
+            <div class="form-group">
+                <label for="WordWrap">Word Wrap:</label>
+                <InputSelect id="WordWrap" @bind-Value="MyOptions.WordWrap" class="form-control">
+                    @foreach (var ww in Enum.GetValues<WordWrap>())
+                    {
+                        <option value="@ww">@ww.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group">
+                <label for="WrappingIndent">Wrapping Indent:</label>
+                <InputSelect id="WrappingIndent" @bind-Value="MyOptions.WrappingIndent" class="form-control">
+                    @foreach (var wi in Enum.GetValues<WrappingIndent>())
+                    {
+                        <option value="@wi">@wi.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="form-group">
+                <InputCheckbox id="ReadOnly" @bind-Value="MyOptions.ReadOnly"/>
+                <label for="ReadOnly">Read Only</label>
+            </div>
+
+            <div class="form-group">
+                <label for="Theme">Theme:</label>
+                <InputSelect id="Theme" @bind-Value="MyOptions.Theme" class="form-control">
+                    @foreach (var theme in Enum.GetValues<Theme>())
+                    {
+                        <option value="@theme">@theme.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+
+
+            <div class="form-group">
+                <label for="AutoClosingBrackets">Auto-Closing Brackets:</label>
+                <InputSelect id="AutoClosingBrackets" @bind-Value="MyOptions.AutoClosingBrackets" class="form-control">
+                    @foreach (var acb in Enum.GetValues<AutoClosingBrackets>())
+                    {
+                        <option value="@acb">@acb.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group">
+                <InputCheckbox id="MatchBrackets" @bind-Value="MyOptions.MatchBrackets"/>
+                <label for="MatchBrackets">Match Brackets</label>
+            </div>
+
+            <h3>Minimap Options</h3>
+            <div class="form-group">
+                <InputCheckbox id="MinimapAutohide" @bind-Value="MyOptions.Minimap.Autohide"/>
+                <label for="MinimapAutohide">Minimap Autohide</label>
+            </div>
+            <div class="form-group">
+                <InputCheckbox id="MinimapEnabled" @bind-Value="MyOptions.Minimap.Enabled"/>
+                <label for="MinimapEnabled">Minimap Enabled</label>
+            </div>
+            <div class="form-group">
+                <label for="MinimapMaxColumn">Minimap Max Column:</label>
+                <InputNumber id="MinimapMaxColumn" @bind-Value="MyOptions.Minimap.MaxColumn" class="form-control"/>
+            </div>
+            <div class="form-group">
+                <InputCheckbox id="MinimapRenderCharacters" @bind-Value="MyOptions.Minimap.RenderCharacters"/>
+                <label for="MinimapRenderCharacters">Minimap Render Characters</label>
+            </div>
+            <div class="form-group">
+                <label for="Scale">Minimap Scale:</label>
+                <InputNumber id="Scale" @bind-Value="MyOptions.Minimap.Scale" class="form-control"/>
+            </div>
+            <div class="form-group">
+                <label for="SectionHeaderFontSize">Minimap Section Header Font Size:</label>
+                <InputNumber id="SectionHeaderFontSize" @bind-Value="MyOptions.Minimap.SectionHeaderFontSize"
+                             class="form-control"/>
+            </div>
+            <div class="form-group">
+                <label for="SectionHeaderLetterSpacing">Minimap Section Header Letter Spacing:</label>
+                <InputNumber id="SectionHeaderLetterSpacing" @bind-Value="MyOptions.Minimap.SectionHeaderLetterSpacing"
+                             class="form-control"/>
+            </div>
+            <div class="form-group">
+                <InputCheckbox id="ShowMarkSectionHeaders" @bind-Value="MyOptions.Minimap.ShowMarkSectionHeaders"/>
+                <label for="ShowMarkSectionHeaders">Minimap Show Mark Section Headers</label>
+            </div>
+            <div class="form-group">
+                <InputCheckbox id="ShowRegionSectionHeaders" @bind-Value="MyOptions.Minimap.ShowRegionSectionHeaders"/>
+                <label for="ShowRegionSectionHeaders">Minimap Show Region Section Headers</label>
+            </div>
+            <div class="form-group">
+                <label for="MinimapShowSlider">Auto-Closing Brackets:</label>
+                <InputSelect id="MinimapShowSlider" @bind-Value="MyOptions.Minimap.ShowSlider" class="form-control">
+                    @foreach (var slider in Enum.GetValues<MinimapShowSlider>())
+                    {
+                        <option value="@slider">@slider.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="form-group">
+                <label for="MinimapSide">Minimap Side:</label>
+                <InputSelect id="MinimapSide" @bind-Value="MyOptions.Minimap.Side" class="form-control">
+                    @foreach (var minimapSide in Enum.GetValues<MinimapSide>())
+                    {
+                        <option value="@minimapSide">@minimapSide.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="form-group">
+                <label for="MinimapSize">Minimap Size:</label>
+                <InputSelect id="MinimapSize" @bind-Value="MyOptions.Minimap.Size" class="form-control">
+                    @foreach (var size in Enum.GetValues<MinimapSize>())
+                    {
+                        <option value="@size">@size.GetOptionDescription()</option>
+                    }
+                </InputSelect>
+            </div>
+            <p> </p>
+
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    public EditorOptions MyOptions { get; set; } = new();
+    private MonacoEditor _monacoEditor = null!;
+    private bool _showConfig1 = false;
+
+    private string _scriptContents = @"
+public static bool Or(bool left, bool right) =>
+    (left, right) switch
+    {
+        (true, true) => true,
+        (true, false) => true,
+        (false, true) => true,
+        (false, false) => false,
+    };
+
+public static bool And(bool left, bool right) =>
+    (left, right) switch
+    {
+        (true, true) => true,
+        (true, false) => false,
+        (false, true) => false,
+        (false, false) => false,
+    };
+public static bool Xor(bool left, bool right) =>
+    (left, right) switch
+    {
+        (true, true) => false,
+        (true, false) => true,
+        (false, true) => true,
+        (false, false) => false,
+    };";
+
+    private async Task HandleValidSubmit()
+    {
+        await _monacoEditor.ReInitializeEditor();
+    }
+
+}

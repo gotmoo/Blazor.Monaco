@@ -5,13 +5,48 @@
 <PageTitle>Two editors</PageTitle>
 <h1>Two editors</h1>
 <p>Page with two editors. Each have their own configuration</p>
-<div>
-    <MonacoEditor ElementId="counted-edit" Language="Language.JavaScript" EditorOptions="FirstOptions"></MonacoEditor>
-    <PrintConfiguration Language="Language.JavaScript" EditorOptions="FirstOptions"/>
+<div class="card card-body example-spacing" style="width: fit-content; background-color: #cff4fc;">
+    <MonacoEditor
+        ElementId="script-one"
+        Language="Language.JavaScript"
+        EditorOptions="FirstOptions"
+        Style="width:800px; height:400px;"
+    />
 </div>
-<div>
-    <MonacoEditor ElementId="script-two" EditorOptions="SecondOptions"></MonacoEditor>
-    <PrintConfiguration EditorOptions="SecondOptions"/>
+<div class="row example-spacing">
+    <div class="col-2">
+        <button class="btn btn-primary" type="button" @onclick="() => _showConfig1 = !_showConfig1">show config</button>
+    </div>
+    @if (_showConfig1)
+    {
+        <div class="col">
+            <pre><code>
+        <PrintConfiguration Language="Language.JavaScript" EditorOptions="FirstOptions"/>
+        </code></pre>
+        </div>
+    }
+</div>
+<div class="card example-spacing" style="width: fit-content; background-color: #cff4fc;">
+    <div class="card-body">
+        <MonacoEditor
+            ElementId="script-two"
+            EditorOptions="SecondOptions"
+            Style="width:800px; height:400px;"
+        />
+    </div>
+</div>
+<div class="row example-spacing">
+    <div class="col-2">
+        <button class="btn btn-primary" type="button" @onclick="() => _showConfig2 = !_showConfig2">show config</button>
+    </div>
+    @if (_showConfig2)
+    {
+        <div class="col">
+            <pre><code>
+        <PrintConfiguration EditorOptions="SecondOptions"/>
+        </code></pre>
+        </div>
+    }
 </div>
 
 @code {
@@ -25,5 +60,8 @@
         FirstOptions.Theme = Theme.VsDark;
         FirstOptions.LineNumbers = LineNumbers.Relative;
     }
+
+    public bool _showConfig1 = false;
+    public bool _showConfig2 = false;
 
 }

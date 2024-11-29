@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.JSInterop;
-using static Blazor.Monaco.Utilities.LinkerFlags;
+using static Blazor.Monaco.LinkerFlags;
 
-namespace Blazor.Monaco.Utilities;
+namespace Blazor.Monaco;
 
 internal static class LinkerFlags
 {
