@@ -5,7 +5,7 @@ namespace Blazor.Monaco;
 
 public partial class MonacoEditor : ComponentBase
 {
-    private DotNetObjectReference<MonacoEditor>? _dotNetHelper = null;
+    private DotNetObjectReference<MonacoEditor> _dotNetHelper;
     private readonly InteropService _service;
 
     public MonacoEditor(InteropService service)
@@ -27,6 +27,7 @@ public partial class MonacoEditor : ComponentBase
 
     protected override void OnInitialized()
     {
+        _dotNetHelper = DotNetObjectReference.Create(this);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -38,14 +39,11 @@ public partial class MonacoEditor : ComponentBase
 
         if (firstRender)
         {
-            _dotNetHelper = DotNetObjectReference.Create(this);
-
-            var dotNetRef = DotNetObjectReference.Create(this);
             EditorOptions.Language = Language ?? EditorOptions.Language;
             _initialCode = !string.IsNullOrWhiteSpace(ScriptContent)
                 ? ScriptContent
                 : MonacoDefaultScript.Get[EditorOptions.Language];
-            await _service.InitializeMonacoEditor(ElementId, _initialCode, EditorOptions, dotNetRef);
+            await _service.InitializeMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
         }
     }
 
@@ -101,5 +99,10 @@ public partial class MonacoEditor : ComponentBase
     public async Task UpdateEditorConfiguration(EditorOptions newConfig)
     {
         await _service.UpdateEditorConfiguration(ElementId, newConfig);
+    }
+
+    public async Task ReInitializeEditor()
+    {
+        await _service.InitializeMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
     }
 }
