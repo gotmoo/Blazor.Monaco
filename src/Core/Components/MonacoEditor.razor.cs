@@ -103,6 +103,7 @@ public partial class MonacoEditor : ComponentBase
 
     public async Task ReInitializeEditor()
     {
+        _initialCode = await GetEditorContent();
         await _service.InitializeMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
     }
 }
