@@ -59,7 +59,7 @@ public partial class MonacoEditor : ComponentBase
     private bool ContentHasChanged { get;  set; }
 
     private string _initialCode = string.Empty;
-
+    private string? _fallbackStyle => Style is null && Class is null ? "min-height: 10em;" : Style;
     protected override void OnInitialized()
     {
     }
