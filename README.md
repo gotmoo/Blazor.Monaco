@@ -39,7 +39,7 @@ If the ScriptContent is null or empty, it will print add example text, relevant 
 - `OnEventCallback<bool> OnContentChanged`: This is fired the first time when content has changed from initial `ScriptContent`, and again when changes are manually reverted to original content.
 - `EventCallback OnSaveRequested`: This is fired when the user presses Ctrl+S in the editor window.
 
-
+If both the Style and Class are undefined, a fallback style of `min-height: 10em;` is applied. Be sure to provice the proper height for your pages. 
 
 ### Component Interaction
 For two-way interaction with the Monaco Editor, such as getting the current contents, you need to apply a reference to the component tag and access its methods:
@@ -47,6 +47,7 @@ For two-way interaction with the Monaco Editor, such as getting the current cont
 ```csharp
 @page "/YourPage"
 @using Blazor.Monaco
+@rendermode InteractiveServer
 <MonacoEditor @ref="_monacoEditorInstance" />
 @code {
     private MonacoEditor _monacoEditorInstance = null!;
@@ -57,6 +58,7 @@ For two-way interaction with the Monaco Editor, such as getting the current cont
 ```csharp
 @page "/YourPage"
 @using Blazor.Monaco
+@rendermode InteractiveServer
 <MonacoEditor @ref="_editor" />
 @code {
     private MonacoEditor _editor = null!;
@@ -79,13 +81,13 @@ For two-way interaction with the Monaco Editor, such as getting the current cont
 ```csharp
 @page "/YourPage"
 @using Blazor.Monaco
+@rendermode InteractiveServer
 <MonacoEditor
     OnContentChanged="OnEditorContentChanged"
     OnSaveRequested="OnEditorSaveRequested"
     @ref="_editor" />
 @code {
     private MonacoEditor _editor = null!;
-    private EditorOptions _editorOptions = new();
     
     private void OnEditorContentChanged(bool hasChanged)
     {
@@ -96,7 +98,21 @@ For two-way interaction with the Monaco Editor, such as getting the current cont
     {
         Console.WriteLine("OnEditorSaveRequested");
         var contents = await _editor.GetEditorContent(resetChangedOnRead: true);
-        //
+        // handle saving the contents
     }
 }
+```
+
+## Notes
+If the editor does not display at all, you may be missing interactive rendermode. Either add this with `@rendermode InteractiveServer` at the top of your page, or in `App.Rrazor`:
+```csharp
+<!DOCTYPE html>
+<html lang="en">
+.... snip ....
+<body>
+    <Routes @rendermode="InteractiveServer"/>
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>
 ```
