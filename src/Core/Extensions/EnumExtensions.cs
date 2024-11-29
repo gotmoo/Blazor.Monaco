@@ -6,21 +6,17 @@ namespace Blazor.Monaco;
 public static class EnumExtensions
 {
     public static string? GetOptionDescription<TEnum>(this TEnum value, bool lowercase = false)
-        where TEnum : struct, IConvertible
+        where TEnum : struct, Enum
     {
-        if (!typeof(TEnum).IsEnum)
+        const string fieldName = nameof(value);  
+        var fieldInfo = typeof(TEnum).GetField(fieldName, BindingFlags.Public | BindingFlags.Static);
+        
+        var description = Enum.GetName(typeof(TEnum), value);
+        
+        if (fieldInfo != null)
         {
-            return null;
-        }
-
-        var description = value.ToString();
-
-        FieldInfo? fieldInfo = value.GetType().GetField(value.ToString() ?? "");
-        if (fieldInfo == null) return lowercase ? description?.ToLowerInvariant() : description;
-        var attributes = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), true);
-        if (attributes.Length > 0)
-        {
-            description = ((DescriptionAttribute)attributes[0]).Description;
+            description = fieldInfo.GetCustomAttributes<DescriptionAttribute>(true)
+                .FirstOrDefault()?.Description ?? description;  
         }
 
         return lowercase ? description?.ToLowerInvariant() : description;
