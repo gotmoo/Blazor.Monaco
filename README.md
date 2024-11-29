@@ -85,7 +85,6 @@ For two-way interaction with the Monaco Editor, such as getting the current cont
     @ref="_editor" />
 @code {
     private MonacoEditor _editor = null!;
-    private EditorOptions _editorOptions = new();
     
     private void OnEditorContentChanged(bool hasChanged)
     {
@@ -96,7 +95,7 @@ For two-way interaction with the Monaco Editor, such as getting the current cont
     {
         Console.WriteLine("OnEditorSaveRequested");
         var contents = await _editor.GetEditorContent(resetChangedOnRead: true);
-        //
+        // handle saving the contents
     }
 }
 ```
