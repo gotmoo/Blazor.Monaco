@@ -87,6 +87,9 @@
                         return monacoInterop.editorInstanceTracker[elementId].netReference.invokeMethodAsync('OnEditorContentChanged', true);
                     }
                 });
+                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function() {
+                    monacoInterop.editorInstanceTracker[elementId].netReference.invokeMethodAsync('OnEditorSaveRequest');
+                });
                 monacoInterop.editorInstances[elementId] = editor;
 
             } else {

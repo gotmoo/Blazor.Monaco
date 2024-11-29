@@ -16,7 +16,8 @@ public partial class MonacoEditor : ComponentBase
     [Parameter] public string ElementId { get; set; } = Guid.NewGuid().ToString();
     [Parameter] public string? ScriptContent { get; set; }
     [Parameter] public Language? Language { get; set; }
-    [Parameter] public EventCallback<bool> ContentChanged { get; set; }
+    [Parameter] public EventCallback<bool> OnContentChanged { get; set; }
+    [Parameter] public EventCallback OnSaveRequested { get; set; }
     [Parameter] public EditorOptions EditorOptions { get; set; } = new();
     public bool ContentHasChanged { get; private set; }
 
@@ -24,8 +25,8 @@ public partial class MonacoEditor : ComponentBase
 
     protected override void OnInitialized()
     {
-        
     }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!_service.LoaderRegistered)
@@ -49,16 +50,25 @@ public partial class MonacoEditor : ComponentBase
     [JSInvokable]
     public async Task OnEditorContentChanged(bool contentChanged)
     {
-        // Console.WriteLine(
-        //     $"OnEditorContentChanged: {contentChanged}");
         ContentHasChanged = contentChanged;
         await NotifyParentOfContentChange();
     }
 
+    [JSInvokable]
+    public async Task OnEditorSaveRequest()
+    {
+        if (OnSaveRequested.HasDelegate)
+        {
+            await OnSaveRequested.InvokeAsync();
+        }
+    }
+
     private async Task NotifyParentOfContentChange()
     {
-        // Console.WriteLine($"NotifyParentOfContentChange: {ContentHasChanged}");
-        await ContentChanged.InvokeAsync(ContentHasChanged);
+        if (OnContentChanged.HasDelegate)
+        {
+            await OnContentChanged.InvokeAsync(ContentHasChanged);
+        }
     }
 
     public async Task SetEditorContent(string newContent)
@@ -85,6 +95,7 @@ public partial class MonacoEditor : ComponentBase
         ScriptContent = newContent;
         await NotifyParentOfContentChange();
     }
+
     public async Task UpdateEditorConfiguration(EditorOptions newConfig)
     {
         await _service.UpdateEditorConfiguration(ElementId, newConfig);
