@@ -11,6 +11,11 @@ The `Blazor.Monaco` package provides a [Blazor](https://blazor.net) component wh
 
 ## Setup
 
+To add to your project, add the package with dotnet.exe:
+```powershell
+dotnet add package Blazor.Monaco --prerelease
+```
+
 To install, add one line to your `program.cs`:
 ```csharp
 builder.Services.AddBlazorMonacoComponents();
@@ -104,7 +109,7 @@ For two-way interaction with the Monaco Editor, such as getting the current cont
 ```
 
 ## Notes
-If the editor does not display at all, you may be missing interactive rendermode. Either add this with `@rendermode InteractiveServer` at the top of your page, or in `App.Rrazor`:
+If the editor does not display at all, you may be missing interactive rendermode. Either add this with `@rendermode InteractiveServer` at the top of your page, or in `App.razor`:
 ```csharp
 <!DOCTYPE html>
 <html lang="en">
