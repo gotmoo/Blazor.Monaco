@@ -13,6 +13,12 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/gotmoo/Blazor.Monaco</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/gotmoo/Blazor.Monaco</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>c# .net blazor monaco editor</PackageTags>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
     
     <ItemGroup>
