@@ -12,12 +12,12 @@ The `Blazor.Monaco` package provides a [Blazor](https://blazor.net) component wh
 ## Setup
 
 To install, add one line to your `program.cs`:
-```
+```csharp
 builder.Services.AddBlazorMonacoComponents();
 ```
-
+## Usage
 To add to your page, simply add:
-```
+```csharp
 <MonacoEditor 
     ElementId="editor-id" 
     Language="Language.JavaScript" 
@@ -29,4 +29,74 @@ To add to your page, simply add:
 
 If the ScriptContent is null or empty, it will print add example text, relevant to the language.
 
+### Component Parameters
+- `ElementId`: The id for the editor component. If not set, a GUID is used.
+- `ScriptContent`: The text that should be displayed.
+- `Language`: Quick way to set the language for the editor. This changes how the contents are displayed.
+- `EditorOptions`: Provide an options object here to specify any option. The Language property above will override the language set in the options. Use `private EditorOptions _editorOptions = new();` to initialize a new instance.
+- `Style`: Apply this CSS styling to the editor component.
+- `Class`: Apply this CSS class to the editor component.
+- `OnEventCallback<bool> OnContentChanged`: This is fired the first time when content has changed from initial `ScriptContent`, and again when changes are manually reverted to original content.
+- `EventCallback OnSaveRequested`: This is fired when the user presses Ctrl+S in the editor window.
 
+
+
+### Component Interaction
+For two-way interaction with the Monaco Editor, such as getting the current contents, you need to apply a reference to the component tag and access its methods:
+
+```csharp
+@page "/YourPage"
+@using Blazor.Monaco
+<MonacoEditor @ref="_monacoEditorInstance" />
+@code {
+    private MonacoEditor _monacoEditorInstance = null!;
+}
+```
+
+#### Editor Methods
+```csharp
+@page "/YourPage"
+@using Blazor.Monaco
+<MonacoEditor @ref="_editor" />
+@code {
+    private MonacoEditor _editor = null!;
+    private EditorOptions _editorOptions = new();
+    private async Task MyAction()
+    {
+        //Read current contents
+        var contents = await _editor.GetEditorContent();
+        //Set updated contents
+        await _editor.SetEditorContent(contents);
+        //update editor's configuration
+        await _editor.UpdateEditorConfiguration(_editorOptions);
+        //re-initialize the editor in the browser
+        await _editor.ReInitializeEditor();
+    }
+}
+```
+
+#### Editor Callbacks
+```csharp
+@page "/YourPage"
+@using Blazor.Monaco
+<MonacoEditor
+    OnContentChanged="OnEditorContentChanged"
+    OnSaveRequested="OnEditorSaveRequested"
+    @ref="_editor" />
+@code {
+    private MonacoEditor _editor = null!;
+    private EditorOptions _editorOptions = new();
+    
+    private void OnEditorContentChanged(bool hasChanged)
+    {
+        Console.WriteLine($"OnEditorContentChanged: {hasChanged}");
+    }
+
+    private async Task OnEditorSaveRequested()
+    {
+        Console.WriteLine("OnEditorSaveRequested");
+        var contents = await _editor.GetEditorContent(resetChangedOnRead: true);
+        //
+    }
+}
+```
