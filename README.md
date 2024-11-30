@@ -6,15 +6,35 @@
 **This package is for use in .NET 9 Blazor projects.**
 ## Introduction
 
-The `Blazor.Monaco` package provides a [Blazor](https://blazor.net) component which adds the [Monaco Editor](https://github.com/microsoft/monaco-editor) to your Blazor pages. This is the same engine that powers [VS Code](https://github.com/microsoft/vscode). The package handles adding all the required components to your site and the interaction between your C# and JavaScript.
+The `Blazor.Monaco` package provides a [Blazor](https://blazor.net) component which adds the 
+[Monaco Editor](https://github.com/microsoft/monaco-editor) to your Blazor pages. This is the same engine that powers
+[VS Code](https://github.com/microsoft/vscode). The package handles adding all the required components to your 
+site and the interaction between your C# and JavaScript. By default, `Blazor.Monaco`
+loads the Monaco Editor libraries from [CloudFlare](https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js),
+but you can specify your own location as well.
 
 
 ## Setup
+
+To add to your project, add the package with dotnet.exe:
+```powershell
+dotnet add package Blazor.Monaco 
+```
 
 To install, add one line to your `program.cs`:
 ```csharp
 builder.Services.AddBlazorMonacoComponents();
 ```
+
+If you need to use another version, or a different CDN you can specify this in startup:
+```csharp
+builder.Services.AddBlazorMonacoComponents(config =>
+{
+    //Change this to specify your own CDN. Must be a full URL. 
+    config.MonacoLoaderUrl = "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js";
+});
+```
+
 ## Usage
 To add to your page, simply add:
 ```csharp
@@ -39,7 +59,7 @@ If the ScriptContent is null or empty, it will print add example text, relevant 
 - `OnEventCallback<bool> OnContentChanged`: This is fired the first time when content has changed from initial `ScriptContent`, and again when changes are manually reverted to original content.
 - `EventCallback OnSaveRequested`: This is fired when the user presses Ctrl+S in the editor window.
 
-If both the Style and Class are undefined, a fallback style of `min-height: 10em;` is applied. Be sure to provice the proper height for your pages. 
+If both the Style and Class are undefined, a fallback style of `min-height: 10em;` is applied. Be sure to provide the proper height for your pages. 
 
 ### Component Interaction
 For two-way interaction with the Monaco Editor, such as getting the current contents, you need to apply a reference to the component tag and access its methods:
@@ -104,8 +124,8 @@ For two-way interaction with the Monaco Editor, such as getting the current cont
 ```
 
 ## Notes
-If the editor does not display at all, you may be missing interactive rendermode. Either add this with `@rendermode InteractiveServer` at the top of your page, or in `App.Rrazor`:
-```csharp
+If the editor does not display at all, you may be missing interactive rendermode. Either add this with `@rendermode InteractiveServer` at the top of your page, or in `App.razor`:
+```html
 <!DOCTYPE html>
 <html lang="en">
 .... snip ....

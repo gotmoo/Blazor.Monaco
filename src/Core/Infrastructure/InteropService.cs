@@ -76,7 +76,7 @@ public class InteropService
     private async Task WaitForMonacoInteropAsync()
     {
         var isInteropScriptLoaded = await LoadAndVerifyScriptAsync(
-            "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js",
+            _libraryConfiguration.MonacoLoaderUrl,
             "monacoInterop.testIsMonacoLoaded()",
             TimeSpan.FromSeconds(10),
             TimeSpan.FromMilliseconds(100));

@@ -17,10 +17,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GlobalState>();
 
         var options = configuration ?? new();
-        if (options.UseTooltipServiceProvider)
-        {
-        }
 
+        
         services.AddScoped<InteropService>();
         services.AddSingleton(options);
 
