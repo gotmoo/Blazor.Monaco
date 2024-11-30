@@ -1,6 +1,6 @@
 ﻿namespace Blazor.Monaco;
 
-public static class MonacoDefaultScript
+internal static class MonacoDefaultScript
 {
     public static readonly Dictionary<Language, string> Get = new()
     {
