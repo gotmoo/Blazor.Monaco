@@ -4,7 +4,7 @@
 
 <h1>Blazor.Monaco examples</h1>
 
-<p>Monaco editor in a Razor component with Change and Save handling.</p>
+<p>Monaco editor in a Razor component with Change and Save handling. Press <code>Control + S</code> to save the editor contents to the text area below.</p>
 <div class="card card-body example-spacing" style="width: fit-content; background-color: #cff4fc;">
     <MonacoEditor ElementId="script-one"
                   Language="Language.JavaScript"
@@ -14,11 +14,16 @@
                   @ref="_monacoEditorInstance"
                   Style="width:800px; height:400px;"
     />
-    <div class="card card-body example-spacing" style="background-color: #20c997; margin-top:  1em;">
-        <div class="alert alert-info col-5">Have the contents changed? @(ContentChanged ? "Yes" : "No")
+    <div class="card card-body example-spacing " style="background-color: #20c997; margin-top:  1em;">
+        <div class="alert alert-info col-5">
+            Have the contents changed?
             @if (_showSaveMessage)
             {
-                <span class="alert alert-success">Saved!</span>
+                <span class="alert-success"> Saved! </span>
+            }
+            else
+            {
+                <span> @(ContentChanged ? "Yes" : "No") </span>
             }
         </div>
         <div class="row-cols-auto">
