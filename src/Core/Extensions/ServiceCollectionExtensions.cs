@@ -1,35 +1,30 @@
-﻿
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-//Namespace is deliberately the root namespace.
 namespace Blazor.Monaco;
 
-public static class ServiceCollectionExtensions
+public static class BlazorMonacoServiceCollectionExtensions
 {
-    /// <summary>
-    /// Add common services required by the Monaco Editor for Blazor library
-    /// </summary>
-    /// <param name="services">Service collection</param>
-    /// <param name="configuration">Library configuration</param>
     public static IServiceCollection AddBlazorMonacoComponents(this IServiceCollection services,
         LibraryConfiguration? configuration = null)
     {
-        services.AddScoped<GlobalState>();
-
         var options = configuration ?? new();
-
-        
-        services.AddScoped<InteropService>();
         services.AddSingleton(options);
 
+        var isWasm = services.Any(service => service.ServiceType == typeof(IWebAssemblyHostEnvironment));
+
+        if (isWasm)
+        {
+            services.AddSingleton<GlobalState>();
+            services.AddSingleton<InteropService>();
+            return services;
+        }
+
+        services.AddScoped<GlobalState>();
+        services.AddScoped<InteropService>();
         return services;
     }
 
-    /// <summary>
-    /// Add common services required by the Monaco Editor for Blazor library
-    /// </summary>
-    /// <param name="services">Service collection</param>
-    /// <param name="configuration">Library configuration</param>
     public static IServiceCollection AddBlazorMonacoComponents(this IServiceCollection services,
         Action<LibraryConfiguration> configuration)
     {

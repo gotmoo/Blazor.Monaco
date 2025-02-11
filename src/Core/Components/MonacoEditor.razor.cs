@@ -66,18 +66,17 @@ public partial class MonacoEditor : ComponentBase
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_service.LoaderRegistered)
-        {
-            await _service.EnsureScriptsLoadedAsync();
-        }
-
         if (firstRender)
         {
+            // Ensure shared Monaco initialization
+            await _service.InitializeAsync();
+
+            // Initialize this specific instance
             EditorOptions.Language = Language ?? EditorOptions.Language;
             _initialCode = !string.IsNullOrWhiteSpace(ScriptContent)
                 ? ScriptContent
                 : MonacoDefaultScript.Get[EditorOptions.Language];
-            await _service.InitializeMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
+            await _service.CreateMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
         }
     }
 
@@ -157,6 +156,6 @@ public partial class MonacoEditor : ComponentBase
     public async Task ReInitializeEditor()
     {
         _initialCode = await GetEditorContent();
-        await _service.InitializeMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
+        await _service.CreateMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
     }
 }
