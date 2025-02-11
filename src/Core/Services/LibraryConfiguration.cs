@@ -32,7 +32,7 @@ public class LibraryConfiguration
     {
     }
 
-    /// <summary />
+
     internal static LibraryConfiguration ForUnitTests => new()
     {
         CollocatedJavaScriptQueryString = null,

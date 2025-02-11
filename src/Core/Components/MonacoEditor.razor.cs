@@ -66,21 +66,25 @@ public partial class MonacoEditor : ComponentBase
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_service.LoaderRegistered)
-        {
-            await _service.EnsureScriptsLoadedAsync();
-        }
-
         if (firstRender)
         {
+            // Ensure shared Monaco initialization
+            await _service.InitializeAsync();
+
+            // Initialize this specific instance
             EditorOptions.Language = Language ?? EditorOptions.Language;
             _initialCode = !string.IsNullOrWhiteSpace(ScriptContent)
                 ? ScriptContent
                 : MonacoDefaultScript.Get[EditorOptions.Language];
-            await _service.InitializeMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
+            await _service.CreateMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
         }
     }
 
+    /// <summary>
+    /// Invoked when the editor content changes.
+    /// </summary>
+    /// <param name="contentChanged">A boolean indicating whether the content has changed.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [JSInvokable]
     public async Task OnEditorContentChanged(bool contentChanged)
     {
@@ -88,6 +92,10 @@ public partial class MonacoEditor : ComponentBase
         await NotifyParentOfContentChange();
     }
 
+    /// <summary>
+    /// Invoked when the editor sends a save request.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [JSInvokable]
     public async Task OnEditorSaveRequest()
     {
@@ -157,6 +165,6 @@ public partial class MonacoEditor : ComponentBase
     public async Task ReInitializeEditor()
     {
         _initialCode = await GetEditorContent();
-        await _service.InitializeMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
+        await _service.CreateMonacoEditor(ElementId, _initialCode, EditorOptions, _dotNetHelper);
     }
 }
