@@ -21,6 +21,9 @@ public class InteropService
         _logger = logger;
     }
 
+    /// Initializes the shared Monaco Editor environment by loading necessary scripts and configurations.
+    /// This method prevents redundant initialization by tracking the initialization state.
+    /// <returns>A Task representing the asynchronous operation of initializing the Monaco Editor environment.</returns>
     public async Task InitializeAsync()
     {
         var loaderUrl = _libraryConfiguration.MonacoLoaderUrl;
@@ -69,6 +72,14 @@ public class InteropService
         }
     }
 
+    /// Creates a Monaco Editor instance within the specified HTML element.
+    /// This method initializes a Monaco Editor with the given element identifier, initial code, editor options, and
+    /// a .NET object reference for interaction.
+    /// <param name="elementId">The ID of the HTML element where the Monaco Editor will be created.</param>
+    /// <param name="initialCode">The initial content to populate within the editor instance.</param>
+    /// <param name="options">The configuration options for the editor, such as language, theme, and other settings.</param>
+    /// <param name="dotnetRef">A .NET object reference to facilitate communication between .NET and JavaScript.</param>
+    /// <returns>A Task representing the asynchronous operation of creating a Monaco Editor instance.</returns>
     public async Task CreateMonacoEditor(string elementId, string initialCode, EditorOptions options,
         DotNetObjectReference<MonacoEditor> dotnetRef)
     {
@@ -87,6 +98,11 @@ public class InteropService
         }
     }
 
+    /// Sets the content of the specified Monaco Editor instance to the provided value.
+    /// This method interacts with the underlying JavaScript API to update the editor's content.
+    /// <param name="elementId">The unique identifier of the Monaco Editor instance to modify.</param>
+    /// <param name="newContent">The new content to set in the editor.</param>
+    /// <returns>A Task that represents the asynchronous operation of setting the editor's content.</returns>
     public async Task SetEditorContent(string elementId, string newContent)
     {
         await _jsRuntime.InvokeVoidAsync("monacoInterop.setEditorContent", elementId, newContent);
@@ -94,6 +110,11 @@ public class InteropService
             ("SetEditorContent: Set for '{Element}'", elementId);
     }
 
+    /// Retrieves the current content of the specified Monaco Editor instance by its element ID.
+    /// This method can optionally reset the "changed" state tracker after reading the content.
+    /// <param name="elementId">The unique identifier of the Monaco Editor instance from which to retrieve content.</param>
+    /// <param name="resetChangedOnRead">A Boolean flag indicating whether the "changed" state tracker should be reset after retrieving content. Defaults to false.</param>
+    /// <returns>A Task representing the asynchronous operation, with a string result containing the current editor content.</returns>
     public async Task<string> GetEditorContent(string elementId, bool resetChangedOnRead = false)
     {
         var content = await _jsRuntime.InvokeAsync<string>("monacoInterop.getEditorContent", elementId, resetChangedOnRead);
@@ -102,6 +123,11 @@ public class InteropService
         return content;
     }
 
+    /// Updates the configuration of a Monaco Editor instance by applying the specified editor options.
+    /// This method invokes a JavaScript function to update the editor configuration and logs the operation.
+    /// <param name="elementId">The unique identifier of the Monaco Editor instance to be updated.</param>
+    /// <param name="editorOptions">The configuration options to be applied to the editor instance.</param>
+    /// <returns>A Task representing the asynchronous operation of updating the editor configuration.</returns>
     public async Task UpdateEditorConfiguration(string elementId, EditorOptions editorOptions)
     {
         await _jsRuntime.InvokeVoidAsync("monacoInterop.updateEditorConfiguration", elementId, editorOptions.ToJson());

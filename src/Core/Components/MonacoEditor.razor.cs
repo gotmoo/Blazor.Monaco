@@ -80,6 +80,11 @@ public partial class MonacoEditor : ComponentBase
         }
     }
 
+    /// <summary>
+    /// Invoked when the editor content changes.
+    /// </summary>
+    /// <param name="contentChanged">A boolean indicating whether the content has changed.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [JSInvokable]
     public async Task OnEditorContentChanged(bool contentChanged)
     {
@@ -87,6 +92,10 @@ public partial class MonacoEditor : ComponentBase
         await NotifyParentOfContentChange();
     }
 
+    /// <summary>
+    /// Invoked when the editor sends a save request.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [JSInvokable]
     public async Task OnEditorSaveRequest()
     {
