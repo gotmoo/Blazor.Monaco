@@ -6,6 +6,8 @@ public enum Language
 {
     [Description("plaintext")]
     PlainText,
+    [Description("markdown")]
+    Markdown,
     [Description("csharp")]
     CSharp,
     [Description("javascript")]
